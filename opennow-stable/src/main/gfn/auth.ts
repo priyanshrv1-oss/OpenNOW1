@@ -998,6 +998,7 @@ export class AuthService {
     ): Promise<AuthSessionResult> => {
       const latestSession = this.getSession() ?? currentSession;
       let refreshedUser: AuthUser | null = null;
+      let userInfoError: string | undefined;
       try {
         refreshedUser = await fetchUserInfo(refreshedTokens);
         console.debug("auth: fetched user info on token refresh", {
@@ -1007,6 +1008,20 @@ export class AuthService {
         });
       } catch (error) {
         console.warn("Token refresh succeeded but user info refresh failed. Keeping cached user:", error);
+        userInfoError = error instanceof Error ? error.message : "Unknown error while fetching user info";
+      }
+
+      if (expectedUserId && !refreshedUser) {
+        return {
+          session: latestSession,
+          refresh: {
+            attempted: true,
+            forced: forceRefresh,
+            outcome: "failed",
+            message: "Token refresh could not verify the expected account identity.",
+            error: userInfoError ?? `expected_user_id:${expectedUserId} user_info_unavailable`,
+          },
+        };
       }
 
       if (expectedUserId && refreshedUser && refreshedUser.userId !== expectedUserId) {
