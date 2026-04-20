@@ -3,7 +3,6 @@ import electron from "electron";
 import { IPC_CHANNELS } from "@shared/ipc";
 import type {
   AuthLoginRequest,
-  AuthSession,
   AuthSessionRequest,
   GamesFetchRequest,
   CatalogBrowseRequest,
@@ -11,7 +10,6 @@ import type {
   RegionsFetchRequest,
   MainToRendererSignalingEvent,
   OpenNowApi,
-  SavedAccount,
   SessionAdReportRequest,
   SessionCreateRequest,
   SessionPollRequest,
@@ -65,10 +63,6 @@ const api: OpenNowApi = {
   getRegions: (input: RegionsFetchRequest = {}) => ipcRenderer.invoke(IPC_CHANNELS.AUTH_GET_REGIONS, input),
   login: (input: AuthLoginRequest) => ipcRenderer.invoke(IPC_CHANNELS.AUTH_LOGIN, input),
   logout: () => ipcRenderer.invoke(IPC_CHANNELS.AUTH_LOGOUT),
-  getSavedAccounts: (): Promise<SavedAccount[]> => ipcRenderer.invoke(IPC_CHANNELS.AUTH_GET_SAVED_ACCOUNTS),
-  switchAccount: (userId: string): Promise<AuthSession> =>
-    ipcRenderer.invoke(IPC_CHANNELS.AUTH_SWITCH_ACCOUNT, userId),
-  removeAccount: (userId: string): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.AUTH_REMOVE_ACCOUNT, userId),
   fetchSubscription: (input: SubscriptionFetchRequest) =>
     ipcRenderer.invoke(IPC_CHANNELS.SUBSCRIPTION_FETCH, input),
   fetchMainGames: (input: GamesFetchRequest) => ipcRenderer.invoke(IPC_CHANNELS.GAMES_FETCH_MAIN, input),
