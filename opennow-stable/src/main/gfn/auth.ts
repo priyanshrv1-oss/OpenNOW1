@@ -641,11 +641,22 @@ export class AuthService {
     this.clearVpcCache();
 
     const result = await this.ensureValidSessionWithStatus(true);
-    if (!result.session || result.refresh.outcome === "failed") {
+    const switchedSession = result.session;
+    const refreshFailed =
+      result.refresh.outcome === "failed" ||
+      result.refresh.outcome === "missing_refresh_token";
+    const sessionUserMismatch =
+      switchedSession !== null && switchedSession.user.userId !== userId;
+
+    if (!switchedSession || refreshFailed || sessionUserMismatch) {
       await this.removeAccount(userId);
-      throw new Error(result.refresh.message);
+      throw new Error(
+        refreshFailed
+          ? result.refresh.message
+          : "Session user mismatch after switch. Please sign in again."
+      );
     }
-    return result.session;
+    return switchedSession;
   }
 
   async removeAccount(userId: string): Promise<void> {
