@@ -131,17 +131,6 @@ export function Navbar({
   const activeUserId = user?.userId ?? null;
 
   useEffect(() => {
-    if (!accountDropdownOpen) return;
-    const onDocumentPointerDown = (event: MouseEvent) => {
-      if (!accountContainerRef.current?.contains(event.target as Node)) {
-        setAccountDropdownOpen(false);
-      }
-    };
-    window.addEventListener("mousedown", onDocumentPointerDown);
-    return () => window.removeEventListener("mousedown", onDocumentPointerDown);
-  }, [accountDropdownOpen]);
-
-  useEffect(() => {
     if (!modalType) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -388,7 +377,14 @@ export function Navbar({
                 />
               </button>
               {accountDropdownOpen && (
-                <div className="navbar-account-dropdown" role="menu" aria-label="Switch account">
+                <>
+                  <button
+                    type="button"
+                    className="navbar-account-backdrop"
+                    onClick={() => setAccountDropdownOpen(false)}
+                    aria-label="Close account menu"
+                  />
+                  <div className="navbar-account-dropdown" role="menu" aria-label="Switch account">
                   <div className="navbar-account-dropdown-header">Switch Account</div>
                   <div className="navbar-account-list">
                     {savedAccounts.map((account) => {
@@ -475,7 +471,8 @@ export function Navbar({
                   >
                     Sign out all accounts
                   </button>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           </>
