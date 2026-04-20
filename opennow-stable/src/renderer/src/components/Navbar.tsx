@@ -378,13 +378,16 @@ export function Navbar({
               </button>
               {accountDropdownOpen && (
                 <>
-                  <button
-                    type="button"
-                    className="navbar-account-backdrop"
-                    onClick={() => setAccountDropdownOpen(false)}
-                    aria-label="Close account menu"
-                    tabIndex={-1}
-                  />
+                  {createPortal(
+                    <button
+                      type="button"
+                      className="navbar-account-backdrop"
+                      onClick={() => setAccountDropdownOpen(false)}
+                      aria-label="Close account menu"
+                      tabIndex={-1}
+                    />,
+                    document.body
+                  )}
                   <div className="navbar-account-dropdown" role="menu" aria-label="Switch account">
                   <div className="navbar-account-dropdown-header">Switch Account</div>
                   <div className="navbar-account-list">
