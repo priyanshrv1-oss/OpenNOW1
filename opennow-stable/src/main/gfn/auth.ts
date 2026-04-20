@@ -635,6 +635,7 @@ export class AuthService {
     if (!target) {
       throw new Error("Saved account not found");
     }
+    const previousActiveUserId = this.activeUserId;
     this.activeUserId = userId;
     this.selectedProvider = target.provider;
     this.clearSubscriptionCache();
@@ -649,6 +650,7 @@ export class AuthService {
       switchedSession !== null && switchedSession.user.userId !== userId;
 
     if (!switchedSession || refreshFailed || sessionUserMismatch) {
+      this.activeUserId = previousActiveUserId;
       await this.removeAccount(userId);
       throw new Error(
         refreshFailed
