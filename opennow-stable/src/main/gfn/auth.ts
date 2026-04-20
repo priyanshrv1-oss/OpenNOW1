@@ -640,7 +640,7 @@ export class AuthService {
     this.clearSubscriptionCache();
     this.clearVpcCache();
 
-    const result = await this.ensureValidSessionWithStatus(true);
+    const result = await this.ensureValidSessionWithStatus(true, userId);
     const switchedSession = result.session;
     const refreshFailed =
       result.refresh.outcome === "failed" ||
@@ -652,7 +652,7 @@ export class AuthService {
       await this.removeAccount(userId);
       throw new Error(
         refreshFailed
-          ? result.refresh.message
+          ? (result.refresh.message || "Session refresh failed. Please sign in again.")
           : "Session user mismatch after switch. Please sign in again."
       );
     }
@@ -945,7 +945,7 @@ export class AuthService {
     return isNearExpiry(tokens.expiresAt, TOKEN_REFRESH_WINDOW_MS);
   }
 
-  async ensureValidSessionWithStatus(forceRefresh = false): Promise<AuthSessionResult> {
+  async ensureValidSessionWithStatus(forceRefresh = false, expectedUserId?: string): Promise<AuthSessionResult> {
     const currentSession = this.getSession();
     if (!currentSession) {
       return {
@@ -998,18 +998,31 @@ export class AuthService {
       source: "client_token" | "refresh_token",
     ): Promise<AuthSessionResult> => {
       const latestSession = this.getSession() ?? currentSession;
-      let user = latestSession.user;
+      let refreshedUser: AuthUser | null = null;
       try {
-        user = await fetchUserInfo(refreshedTokens);
-        console.debug("auth: fetched user info on token refresh", { userId: user.userId, email: user.email, avatarUrl: user.avatarUrl });
+        refreshedUser = await fetchUserInfo(refreshedTokens);
+        console.debug("auth: fetched user info on token refresh", { userId: refreshedUser.userId, email: refreshedUser.email, avatarUrl: refreshedUser.avatarUrl });
       } catch (error) {
         console.warn("Token refresh succeeded but user info refresh failed. Keeping cached user:", error);
       }
+      if (expectedUserId && refreshedUser && refreshedUser.userId !== expectedUserId) {
+        return {
+          session: null,
+          refresh: {
+            attempted: true,
+            forced: forceRefresh,
+            outcome: "failed",
+            message: "Session user mismatch after switch. Please sign in again.",
+            error: `Expected refreshed user ${expectedUserId}, received ${refreshedUser.userId}.`,
+          },
+        };
+      }
+      const user = refreshedUser ?? latestSession.user;
 
       const updatedSession: AuthSession = {
         provider: latestSession.provider,
         tokens: refreshedTokens,
-        user: user ?? latestSession.user,
+        user,
       };
       this.sessions.set(updatedSession.user.userId, updatedSession);
 

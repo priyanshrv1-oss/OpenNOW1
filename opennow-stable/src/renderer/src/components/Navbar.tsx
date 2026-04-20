@@ -383,6 +383,7 @@ export function Navbar({
                     className="navbar-account-backdrop"
                     onClick={() => setAccountDropdownOpen(false)}
                     aria-label="Close account menu"
+                    tabIndex={-1}
                   />
                   <div className="navbar-account-dropdown" role="menu" aria-label="Switch account">
                   <div className="navbar-account-dropdown-header">Switch Account</div>
