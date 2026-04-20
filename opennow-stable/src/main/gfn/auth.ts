@@ -650,6 +650,9 @@ export class AuthService {
       if (switchedUserMismatch) {
         throw new Error("Switched session did not match the selected account.");
       }
+      if (result.refresh.outcome === "missing_refresh_token") {
+        throw new Error("Saved login for this account is incomplete. Please log in to this account again.");
+      }
       throw new Error(result.refresh.message || fallbackMessage);
     }
     return result.session;
