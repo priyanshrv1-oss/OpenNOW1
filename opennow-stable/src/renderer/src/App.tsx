@@ -430,7 +430,7 @@ function isSessionLimitError(error: unknown): boolean {
   }
   if (error instanceof Error) {
     const msg = error.message.toUpperCase();
-    return msg.includes("SESSION LIMIT") || msg.includes("INSUFFICIENT_PLAYABILITY") || msg.includes("DUPLICATE SESSION");
+    return msg.includes("SESSION LIMIT") || msg.includes("DUPLICATE SESSION");
   }
   return false;
 }
@@ -752,7 +752,6 @@ function toLaunchErrorState(error: unknown, stage: StreamLoadingStatus): LaunchE
 
   if (
     isSessionLimitError(error) ||
-    combined.includes("INSUFFICIENT_PLAYABILITY") ||
     combined.includes("SESSION_LIMIT") ||
     combined.includes("DUPLICATE SESSION")
   ) {

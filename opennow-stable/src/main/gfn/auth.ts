@@ -14,6 +14,7 @@ import type {
   AuthTokens,
   AuthUser,
   LoginProvider,
+  SavedAccount,
   StreamRegion,
   SubscriptionInfo,
 } from "@shared/gfn";
@@ -612,22 +613,24 @@ export class AuthService {
     return this.sessions.get(this.activeUserId) ?? null;
   }
 
-  getSavedAccounts(): Array<{
-    userId: string;
-    displayName: string;
-    email?: string;
-    avatarUrl?: string;
-    membershipTier: string;
-    providerCode: string;
-  }> {
-    return Array.from(this.sessions.values()).map((session) => ({
+  private toSavedAccount(session: AuthSession | null): SavedAccount | null {
+    if (!session) {
+      return null;
+    }
+    return {
       userId: session.user.userId,
       displayName: session.user.displayName,
       email: session.user.email,
       avatarUrl: session.user.avatarUrl,
       membershipTier: session.user.membershipTier,
       providerCode: session.provider.code,
-    }));
+    };
+  }
+
+  getSavedAccounts(): SavedAccount[] {
+    return Array.from(this.sessions.values())
+      .map((session) => this.toSavedAccount(session))
+      .filter((account): account is SavedAccount => account !== null);
   }
 
   async switchAccount(userId: string): Promise<AuthSession> {
@@ -1108,8 +1111,10 @@ export class AuthService {
     if (!tokens.clientToken && !tokens.refreshToken) {
       if (expired) {
         await this.logout();
+        const promotedSession = this.getSession();
         return {
-          session: this.getSession(),
+          session: promotedSession,
+          promotedAccount: this.toSavedAccount(promotedSession),
           refresh: {
             attempted: true,
             forced: forceRefresh,
