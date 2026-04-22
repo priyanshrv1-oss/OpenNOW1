@@ -367,7 +367,7 @@ export function Navbar({
                 className="navbar-user navbar-user--clickable"
                 onClick={() => setAccountDropdownOpen((previous) => !previous)}
                 aria-expanded={accountDropdownOpen}
-                aria-haspopup="menu"
+                aria-haspopup="true"
               >
                 {user.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user.displayName} className="navbar-avatar" />

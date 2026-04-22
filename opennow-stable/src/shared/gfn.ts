@@ -314,6 +314,7 @@ export interface AuthRefreshStatus {
 
 export interface AuthSessionResult {
   session: AuthSession | null;
+  promotedAccount?: SavedAccount | null;
   refresh: AuthRefreshStatus;
 }
 

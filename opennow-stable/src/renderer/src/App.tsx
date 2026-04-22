@@ -752,7 +752,6 @@ function toLaunchErrorState(error: unknown, stage: StreamLoadingStatus): LaunchE
 
   if (
     isSessionLimitError(error) ||
-    combined.includes("INSUFFICIENT_PLAYABILITY") ||
     combined.includes("SESSION_LIMIT") ||
     combined.includes("DUPLICATE SESSION")
   ) {
